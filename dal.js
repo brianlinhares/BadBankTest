@@ -4,7 +4,7 @@ require('dotenv').config()
 //=================================================MONGO Connect=================================================
 // connects to database
 const connectionURL = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.ebre3yq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
-const dbName = "myproject"
+const dbName = "myproject";
 
 //get MongoClient
 const MongoClient = mongodb.MongoClient;
