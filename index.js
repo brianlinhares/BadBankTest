@@ -1,143 +1,77 @@
-var express = require('express');
-var app = express();
-var cors = require('cors');
-var dal = require('./dal.js');
-const e = require('express');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+// function Spa() {
+//   return (
+//     <HashRouter>
+//       <div>
+//         <NavBar/>        
+//         <UserContext.Provider value={{users:[{name:'brian',email:'brian@mit.edu',password:'secret',balance:100}]}}>
+//           <div className="container" style={{padding: "20px"}}>
+//             <Route path="/" exact component={Home} />
+//             <Route path="/CreateAccount/" component={CreateAccount} />
+//             <Route path="/login/" component={Login} />
+//             <Route path="/deposit/" component={Deposit} />
+//             <Route path="/withdraw/" component={Withdraw} />
+//             {/* <Route path="/transactions/" component={Transactions} /> */}
+//             <Route path="/alldata/" component={AllData} />
+//           </div>
+//         </UserContext.Provider>
+//       </div>
+//     </HashRouter>
+//   );
+// }
 
-// used to serve static files from public directory
-app.use(express.static('public'));
-app.use(cors());
+// ReactDOM.render(
+//   <Spa/>,
+//   document.getElementById('root')
+// );
 
-//=================================================Withdraw=================================================
-app.get('/account/withdraw/:email/:amount', function (req, res) {
-  dal.updateNegative(req.params.email, req.params.amount).
-  then((user) => {
-      console.log(user);
-  });  
-  res.send({
-        name:       req.params.name,  
-        email:      req.params.email,
-        password:   req.params.password,
-        balance:    req.params.balance,
-        amount:     req.params.amount
-    });
-});
-//=================================================Deposit=================================================
-app.get('/account/deposit/:email/:amount', function (req, res) {
-  dal.update(req.params.email, req.params.amount).
-  then((user) => {
-      console.log(user);
-  });  
-  res.send({
-        name:       req.params.name,  
-        email:      req.params.email,
-        password:   req.params.password,
-        balance:    req.params.balance,
-        amount:     req.params.amount
-    });
-});
-//=================================================Login=================================================
-app.get('/account/login/:email/:password', function (req, res) {
-  dal.find(req.params.email).
-      then((user) => {
-          if(user.length > 0){
-              const decodePassword = decodeURIComponent(req.params.password);
-              bcrypt.compare(decodePassword, user[0].password).then(function(result) {
-                  if (result){
-                      res.send(user[0]);
-                  }
-                  else{
-                      res.send('Incorrect Password');
-                  }
-              });
-          }
-          else{
-              res.send('Incorrect Account Email');
-          }
-  });
-});
-//=================================================Same as starter=================================================
-  app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/login');
-  });
-//=================================================Same as starter=================================================
-  app.get('/protected', (req, res) => {
-    if (req.session.products) {
-      res.render('protected', { products: req.session.products });
-    } else {
-      res.redirect('/login');
-    }
-  });
-//=================================================Locate Account=================================================
-app.get('/account/find/:email', function (req, res) {
+function Spa() {
+  const [user, setUser] = React.useState({});
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [admin, setAdmin] = React.useState(false);
 
-  dal.find(req.params.email).
-      then((user) => {
-          console.log(user);
-          res.send(user);
-  });
-});
-//=================================================Alt Locate Account=================================================
-app.get('/account/findOne/:email', function (req, res) {
+  //sets logged in when user logs in
+function setlogIn (log) {
+  setLoggedIn(log);
+}
 
-  dal.findOne(req.params.email).
-      then((user) => {
-          console.log(user);
-          res.send(user);
+//sets user when user logs in
+function idUser (data) {
+  setUser({...user,
+    id: data._id,
+    name: data.name,
+    email: data.email,
+    password: data.password,
+    balance: data.balance,
   });
-});
-//=================================================Create Account=================================================
-app.get('/account/create/:name/:email/:password/:role', function (req, res) {
-  dal.find(req.params.email).
-      then((users) => {
-          if(users.length > 0){
-              console.log('This username is taken, please select another.');
-              res.send('This username is taken, please select another.');    
-            }
-          else{
-              const decodePassword = decodeURIComponent(req.params.password);
-              bcrypt.hash(decodePassword, saltRounds).then(function(hash) {
-                  dal.create(req.params.name,req.params.email,hash,req.params.role).
-                  then((user) => {
-                      console.log(user);
-                      res.send(user);            
-                  }); 
-              });
-            }
-      });
-});
-//=================================================Login=================================================
-app.get('/account/login/:email/:password', function (req, res) {
-  dal.find(req.params.email).
-      then((user) => {
-          if(user.length > 0){
-              const decodePassword = decodeURIComponent(req.params.password);
-              bcrypt.compare(decodePassword, user[0].password).then(function(result) {
-                  if (result){
-                      res.send(user[0]);
-                  }
-                  else{
-                      res.send('Login failed: wrong password');
-                  }
-              });
-              }
-          else{
-              res.send('Login failed: user not found');
-          }
-  });
-});
-//=================================================All accounts=================================================
-app.get('/account/all', function (req, res) {
-    dal.all().
-        then((docs) => {
-            console.log(docs);
-            res.send(docs);
-    });
-});
-//=================================================LISTEN & PORT=================================================
-var port = 3000;
-app.listen(port);
-console.log('Running on port: '+port);
+}
+
+//set user balance when logged in or when balance changes
+function balanceUser (balance) {
+  setUser({...user, balance: balance});
+}
+
+return (
+    <HashRouter>
+      <div>
+      <UserContext.Provider value={[{user: user}, {idUser: idUser}, {logIn: loggedIn}, {setlogIn: setlogIn}, {userBal: userBal}, {balanceUser: balanceUser}]}>
+        <NavBar />        
+          <div className="container" style={{padding: "20px"}}>
+            <Route path="/" exact component={Home} />
+            <Route path="/CreateAccount/" component={CreateAccount} />
+            <Route path="/login/" component={Login} />
+            <Route path="/deposit/" component={Deposit} />
+            <Route path="/withdraw/" component={Withdraw} />
+            {/* <Route path="/transactions/" component={Transactions} /> */}
+            <Route path="/balance/" component={Balance} />
+            <Route path="/alldata/" component={AllData} />
+          </div>
+        </UserContext.Provider>
+      </div>
+    </HashRouter>
+  );
+}
+
+ReactDOM.render(
+  <Spa/>,
+  document.getElementById('root')
+);
