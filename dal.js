@@ -3,7 +3,7 @@ const MongoClient = require('mongodb').MongoClient;
 let db            = null;
  
 //=================================================MONGO Connect=================================================
-MongoClient.connect('mongodb+srv:////${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.ebre3yq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', function(err, client){
+MongoClient.connect('mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.ebre3yq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', function(err, client){
     console.log("Connected successfully to Mongo DataBase server");
     db = client.db('myproject');
 });
